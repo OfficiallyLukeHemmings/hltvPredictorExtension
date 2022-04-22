@@ -1,0 +1,13 @@
+{
+    "manifest_version": 3,
+    "name": "HLTV Predictor",
+    "version": "1.0.0",
+    "author": "Luke Robert Hemmings (Bournemouth University)",
+    "content_scripts": [
+        {
+            "matches": ["https://www.hltv.org/matches/*"],
+            "js": ["content.js"]
+        }
+    ]
+    
+}
