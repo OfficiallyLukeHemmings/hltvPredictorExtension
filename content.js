@@ -1,54 +1,113 @@
-// Coutdown innerText
-let countdown = document.querySelector("body > div.bgPadding > div.widthControl > div.colCon > div.contentCol > div.match-page > div.standard-box.teamsBox > div.timeAndEvent > div.countdown")
-  .innerText;
-if (countdown == null) {
-  // Try for a LIVE game instead
-  countdown = document.querySelector("body > div.bgPadding > div.widthControl > div.colCon > div.contentCol > div.match-page > div.standard-box.teamsBox > div.timeAndEvent > div.countdown.countdown-live");
+async function createAndRenderPrediction() {
+
+  async function postRequest(gameDetails) {
+    // Handling POST request to API
+    let predictions = await fetch("https://hltv-prediction-extension-api.ew.r.appspot.com/", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(gameDetails)
+    }).then(res => {
+      // If status is anything but 200, throw error and preventing rendering
+      // of Prediction Box on page. 
+      if (res.status !== 200) {
+        throw new Error("Invalid response status from POST request");
+      }
+      return res.json();
+    });
+    return predictions;
+  }
+
+  async function generatePredictionString(gameDetails) {
+    predictions = await postRequest(gameDetails);
+    // Predictions will be either 1 (truthy) or 0 (falsy), hence the use of 
+    // ternary operators to condense the const assignment.
+    const optimisticPrediction = predictions["optimistic-prediction"]
+      ? "😎\n You will likely enjoy this game"
+      : "😴\n You likely won't enjoy this game";
+
+    const pessimisticPrediction = predictions["pessimistic-prediction"]
+      ? "😎\n You will likely enjoy this game"
+      : "😴\n You likely won't enjoy this game";
+
+    console.log("PREDICTIONS:", optimisticPrediction, pessimisticPrediction);
+    
+    // Preparing PredictionBox text
+    let predictionText = `Optimistic Model Prediction: ${optimisticPrediction}
+
+    Pessimistic Model Prediction: ${pessimisticPrediction}`; 
+
+    return predictionText;
+  }
+
+  if (getIsGameIncomplete()) {
+    // Ensuring the DOM is loaded before seeking the data
+    window.addEventListener("load", async (e) => {
+      try {
+        // Get features from upcoming/ongoing game to fetch to API for result
+        const gameDetails = getGameDetails();
+        console.log(gameDetails);
+        // If any game details are missing throw an error.
+        const missingDetail = Object.values(gameDetails).some(
+          (detail) => detail === null);
+        if (missingDetail) throw new Error("Game detail missing");
+        
+        predictionText = await generatePredictionString(gameDetails);
+  
+        // Getting correct div for addition of prediction detail to page
+        const div = document.querySelector("body > div.bgPadding > div.widthControl > div.colCon > div.contentCol > div.match-page > div.g-grid.maps > div.col-6.col-7-small");
+        
+        // Creation of span subtitle
+        const span = document.createElement("span");
+        span.classList.add("headline");
+        span.innerHTML = "HLTV Extension Predictions";
+  
+        // Creation of prediction box (nested div)
+        const predictionOuterBox = document.createElement("div");
+        predictionOuterBox.classList.add("prediction-box", "standard-box", "veto-box");
+        // (changing style to be easily identifiable by users)
+        predictionOuterBox.style.color = "#ffffff";
+        predictionOuterBox.style.backgroundColor = "#435971";
+        predictionOuterBox.style.fontWeight = "bold";
+        predictionOuterBox.style.fontSize = "16px"
+  
+        const predictionInnerBox = document.createElement("div");
+        predictionInnerBox.classList.add("padding", "preformatted-text");
+        predictionInnerBox.innerText = predictionText
+        predictionOuterBox.appendChild(predictionInnerBox);
+  
+        // Appending span subtitle and prediction box to page
+        div.prepend(predictionOuterBox);
+        div.prepend(span);
+  
+      } catch (err) {
+        console.log(err.message);
+      }
+    });
+  } else {
+    console.log("Upcoming or live game not found");
+  }
 }
 
-if (countdown != "Match over") {
-  // Ensuring the DOM is loaded before seeking the data
-  window.addEventListener("load", (e) => {
+
+function getIsGameIncomplete(){
+  // Coutdown innerText
+  let countdown = null;
+
+  try {
+      countdown = document.querySelector("body > div.bgPadding > div.widthControl > div.colCon > div.contentCol > div.match-page > div.standard-box.teamsBox > div.timeAndEvent > div.countdown").innerText;
+  } catch (err) {
+    console.log(err.message);
+    // Try for a LIVE game instead
     try {
-      // Get features from upcoming/ongoing game to fetch to API for result
-      const gameDetails = getGameDetails();
-      console.log(gameDetails);
-      // If any game details are missing throw an error.
-      const missingDetail = Object.values(gameDetails).some(detail => detail === null);
-      if (missingDetail) throw new Error("Game detail missing")
-
-
-      ///////////TODO///////////  fetch to API
-      let predictionText = "HLTV Prediction:\n";
-      predictionText += "😎";
-      //////////////////////////
-
-      // Getting correct div for addition of prediction detail to page
-      const div = document.querySelector("body > div.bgPadding > div.widthControl > div.colCon > div.contentCol > div.match-page > div.g-grid.maps > div.col-6.col-7-small");
-      
-      // Creation of span subtitle
-      const span = document.createElement("span");
-      span.classList.add("headline");
-      span.innerHTML = "Prediction";
-
-      // Creation of prediction box (nested div)
-      const predictionOuterBox = document.createElement("div");
-      predictionOuterBox.classList.add("standard-box", "veto-box");
-
-      const predictionInnerBox = document.createElement("div");
-      predictionInnerBox.classList.add("padding", "preformatted-text");
-      predictionInnerBox.innerText = predictionText
-      predictionOuterBox.appendChild(predictionInnerBox);
-
-      // Appending span subtitle and prediction box to page
-      div.prepend(predictionOuterBox);
-      div.prepend(span);
+      if (countdown == null) {
+        countdown = document.querySelector("body > div.bgPadding > div.widthControl > div.colCon > div.contentCol > div.match-page > div.standard-box.teamsBox > div.timeAndEvent > div.countdown.countdown-live").innerText;  
+      }
     } catch (err) {
       console.log(err.message);
     }
-  });
-} else {
-  console.log("Upcoming or live game not found");
+  }
+  console.log(countdown.toLowerCase() !== "match over");
+  return (countdown.toLowerCase() !== "match over");
 }
 
 
@@ -79,7 +138,8 @@ function getGameType() {
 
 function getBettingDiff() {
   // Testing getting betting odds difference from extension
-  const bettingTable = document.querySelector("#betting > div.world-vVP3JBh5AswY4yBD-list > div > div.three-quarter-width > div > table > tbody");
+  const bettingTable = document.querySelector("#betting > div.g-grid > div.col-8.mobile-normal-priority > div.match-betting-list.standard-box > table > tbody");
+  console.log(bettingTable)
   const rowsArray = Array.from(bettingTable.rows);
 
   // Removing title row
@@ -110,7 +170,7 @@ function getBettingDiff() {
   });
 
   // Return the mean betting difference (absolute value) to 3dp.
-  return (bettingDifferencesSums / validBettingRows).toFixed(3);
+  return parseFloat((bettingDifferencesSums / validBettingRows).toFixed(3));
 }
 
 
@@ -135,10 +195,10 @@ function getTeamRanks() {
 function getGameDetails() {
   // Creating gameDetails object to be sent to ML API
   const gameDetails = {
-    eventType: null,
-    team1Rank: null,
-    team2Rank: null,
-    bettingOddsDiff: null,
+    "eventType": null,
+    "team1Rank": null,
+    "team2Rank": null,
+    "bettingOddsDiff": null,
   };
 
   // Getting event type
@@ -150,6 +210,7 @@ function getGameDetails() {
   gameDetails.team1Rank = teamRanks.team1Rank;
   gameDetails.team2Rank = teamRanks.team2Rank;
 
-  console.log(gameDetails);
   return gameDetails;
 }
+
+createAndRenderPrediction();
