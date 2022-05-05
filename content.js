@@ -30,9 +30,9 @@ async function createAndRenderPrediction() {
       : "😴\n You likely won't enjoy this game";
 
     // Preparing PredictionBox text
-    let predictionText = `Optimistic Model Prediction: ${optimisticPrediction}
+    let predictionText = `Optimistic Prediction: ${optimisticPrediction}
 
-    Pessimistic Model Prediction: ${pessimisticPrediction}`; 
+    Pessimistic Prediction: ${pessimisticPrediction}`; 
 
     return predictionText;
   }
