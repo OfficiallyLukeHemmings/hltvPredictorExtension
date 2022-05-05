@@ -29,8 +29,6 @@ async function createAndRenderPrediction() {
       ? "😎\n You will likely enjoy this game"
       : "😴\n You likely won't enjoy this game";
 
-    console.log("PREDICTIONS:", optimisticPrediction, pessimisticPrediction);
-    
     // Preparing PredictionBox text
     let predictionText = `Optimistic Model Prediction: ${optimisticPrediction}
 
@@ -39,13 +37,14 @@ async function createAndRenderPrediction() {
     return predictionText;
   }
 
+
   if (getIsGameIncomplete()) {
     // Ensuring the DOM is loaded before seeking the data
     window.addEventListener("load", async (e) => {
       try {
         // Get features from upcoming/ongoing game to fetch to API for result
         const gameDetails = getGameDetails();
-        console.log(gameDetails);
+        
         // If any game details are missing throw an error.
         const missingDetail = Object.values(gameDetails).some(
           (detail) => detail === null);
@@ -106,8 +105,15 @@ function getIsGameIncomplete(){
       console.log(err.message);
     }
   }
-  console.log(countdown.toLowerCase() !== "match over");
-  return (countdown.toLowerCase() !== "match over");
+
+  try {
+    // Returns true if game is not over, i.e. game is incomplete
+    return (countdown.toLowerCase() !== "match over");
+  } catch (err) {
+    console.log(err.message);
+    return false
+  }
+  
 }
 
 
@@ -139,7 +145,7 @@ function getGameType() {
 function getBettingDiff() {
   // Testing getting betting odds difference from extension
   const bettingTable = document.querySelector("#betting > div.g-grid > div.col-8.mobile-normal-priority > div.match-betting-list.standard-box > table > tbody");
-  console.log(bettingTable)
+  
   const rowsArray = Array.from(bettingTable.rows);
 
   // Removing title row

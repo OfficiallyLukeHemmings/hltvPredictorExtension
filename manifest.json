@@ -1,8 +1,11 @@
 {
     "manifest_version": 3,
-    "name": "HLTV Predictor",
+    "name": "HLTV Enjoyability Predictor",
     "version": "1.0.0",
     "author": "Luke Robert Hemmings (Bournemouth University)",
+    "icons": { "128": "icon.png" },
+    "description": "A machine learning model for predicting enjoyability of upcoming and live CS:GO games on HLTV.org."
+    ,
     "content_scripts": [
         {
             "matches": ["https://www.hltv.org/matches/*"],
