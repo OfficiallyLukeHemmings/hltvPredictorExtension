@@ -247,6 +247,10 @@ function getBettingDiff() {
     }
   });
 
+  // Throw an error if no valid betting odds rows are found, i.e. if all 
+  // betting odds rows contain promotions rather than the betting odds
+  if (validBettingRows === 0) throw new Error("No readable betting rows found");
+  
   // Return the mean betting difference (absolute value) to 3dp.
   return parseFloat((bettingDifferencesSums / validBettingRows).toFixed(3));
 }
