@@ -54,6 +54,16 @@ async function createAndRenderPrediction() {
 
     Pessimistic Prediction: ${pessimisticPrediction}`; 
 
+    /* In the testing phase test users highlighted the pessimistic predictions
+     to be more accurace in a working environment. As such, this extension
+     was adapted to provide only the pessimistic predictions. 
+     The code above remains unchanged to allow markers to see the code's 
+     state during the testing phase. Below the prediction text is replaced
+     by the pessimistic prediction only.
+    */ 
+
+    // Replacing the predictionText with the pessimistic prediction only.
+    predictionText = pessimisticPrediction;
     // Returns string to be displayed in prediction box created 
     return predictionText;
   }
@@ -69,7 +79,7 @@ async function createAndRenderPrediction() {
     // Creation of span subtitle
     const span = document.createElement("span");
     span.classList.add("headline");
-    span.innerHTML = "HLTV Extension Predictions";
+    span.innerHTML = "HLTV Extension Prediction";
 
     // Creation of prediction box (nested div)
     const predictionOuterBox = document.createElement("div");
@@ -85,7 +95,7 @@ async function createAndRenderPrediction() {
     predictionInnerBox.innerText = predictionString;
     predictionOuterBox.appendChild(predictionInnerBox);
 
-    // Appending span subtitle and prediction box to page
+    // Appending span sub-title and prediction box to page
     div.prepend(predictionOuterBox);
     div.prepend(span);
   }
